@@ -66,9 +66,10 @@ common_distance = np.linspace(
     0,
     min(tel_ver["Distance"].max(), tel_ham["Distance"].max()),
     1000
-)
+) #Divide the lap into 1000 points for a common ground for both driver data collected
 
-speed_ver = np.interp(common_distance, tel_ver["Distance"], tel_ver["Speed"])
+#Interpolation approximate the speed
+speed_ver = np.interp(common_distance, tel_ver["Distance"], tel_ver["Speed"])   
 speed_ham = np.interp(common_distance, tel_ham["Distance"], tel_ham["Speed"])
 
 delta = speed_ver - speed_ham  #delta > 0: ver faster else delta < 0: ham faster
