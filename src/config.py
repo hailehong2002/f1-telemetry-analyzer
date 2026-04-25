@@ -1,0 +1,6 @@
+YEAR = 2023
+GRAND_PRIX = "Hungary"
+SESSION_TYPE = "Q"
+DRIVERS = ["VER", "HAM"]
+CACHE_DIR = "cache"
+N_POINTS = 1000
