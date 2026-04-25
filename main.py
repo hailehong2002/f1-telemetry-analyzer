@@ -46,6 +46,9 @@ throttle_ham = np.interp(common_distance, tel_ham["Distance"], tel_ham["Throttle
 brake_ver = np.interp(common_distance, tel_ver["Distance"], tel_ver["Brake"].astype(int))
 brake_ham = np.interp(common_distance, tel_ham["Distance"], tel_ham["Brake"].astype(int))
 
+time_ver = np.interp(common_distance, tel_ver["Distance"], tel_ver["Time"].dt.total_seconds())
+time_ham = np.interp(common_distance, tel_ham["Distance"], tel_ham["Time"].dt.total_seconds())
+
 # =========================
 # 2. Separate Racing Line Plot
 # =========================
@@ -153,10 +156,11 @@ def update(frame):
     trail_ham.set_data(x_ham[trail_start:frame], y_ham[trail_start:frame])
 
     speed_delta = s_ver[frame] - s_ham[frame]
+    time_delta = time_ver[frame] - time_ham[frame]
 
-    if speed_delta > 0:
+    if time_delta > 0:
         faster_now = "VER"
-    elif speed_delta < 0:
+    elif time_delta < 0:
         faster_now = "HAM"
     else:
         faster_now = "Equal"
@@ -165,7 +169,8 @@ def update(frame):
         f"Distance: {replay_distance[frame]:.0f} m\n"
         f"VER speed: {s_ver[frame]:.1f} km/h\n"
         f"HAM speed: {s_ham[frame]:.1f} km/h\n"
-        f"Speed delta: {speed_delta:+.1f} km/h\n"
+        f"Speed delta: {speed_delta:+.2f} km/h\n"
+        f"Time delta: {time_delta:+.3f} s\n"
         f"Currently faster: {faster_now}"
     )
 
