@@ -118,27 +118,12 @@ load_session()
 
 ### Corner Detection
 
-Corners are detected purely from telemetry — no circuit map required — using two independent conditions joined with OR:
-
-**Condition 1 — Speed threshold**  
-The average speed of both drivers is computed at each sample. Any point below the **35th percentile** of that average is flagged as slow enough to be a corner.
-
-**Condition 2 — Brake activity**  
-The raw brake signals (binary on/off per driver) are summed and then smoothed with a 15-sample moving-average window so that the full braking zone is captured rather than just the individual frames where the pedal is depressed. A point is flagged as a braking event when the smoothed signal exceeds 0.15 (roughly one driver braking for at least 15% of the local window) **and** the average speed at that point is below the **60th percentile** — this second speed guard filters out DRS-zone brake stabs at the end of long straights, which are not corners.
-
-**Merging**  
-Any point satisfying either condition is a corner candidate. Consecutive candidates are merged into a single zone. Zones shorter than 50 m are dropped as noise.
-
-```
-is_slow    = avg_speed < percentile(avg_speed, 35)
-is_braking = smoothed_brake > 0.15  AND  avg_speed < percentile(avg_speed, 60)
-is_corner  = is_slow OR is_braking
-```
+Corners are detected purely from telemetry — no circuit map required. The average speed of both drivers is computed at each point along the lap. Any sample below the **30th percentile** of that average speed is flagged as a corner candidate. Consecutive flagged samples are merged into a single zone, and zones shorter than 50 m are discarded as noise (chicane bumps, slow-speed wiggles, etc.).
 
 Each corner is stored as `(start_index, end_index, start_distance, end_distance)` and numbered from 1 in lap order.
 
-**Strength:** catches corners that appear slow but have light braking (high-speed sweepers) as well as tight hairpins where braking dominates.  
-**Limitation:** the thresholds are global per-lap percentiles, so they adapt to each circuit automatically but may misclassify safety-car laps or sessions with heavily varied speeds.
+**Strength:** works on any circuit without hard-coded corner lists.  
+**Limitation:** the 30th-percentile threshold is circuit-agnostic, so very slow or very fast tracks may produce too many or too few zones. `N_POINTS` also affects corner resolution — lower values merge nearby zones.
 
 ---
 
@@ -182,3 +167,6 @@ The replay animates both cars simultaneously at 30 ms per frame on a 2-D track m
 - Export per-corner data to CSV for further analysis
 - Interactive Plotly/Streamlit dashboard
 - Sector-level breakdown aligned to official F1 sector markers
+
+## Future works
+- Create a model to mimic the driver decision and compare it with a driver.
